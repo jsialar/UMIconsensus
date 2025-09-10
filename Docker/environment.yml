@@ -1,0 +1,13 @@
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:  
+  - minimap2=2.30
+  - samtools=1.21
+  - pip=24.2
+  - pip:
+    - pysam==0.22.1
+    - pandas==2.2.2
+    - cutadapt==5.1
+    - umi_tools==1.1.6

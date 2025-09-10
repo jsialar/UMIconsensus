@@ -1,0 +1,158 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com///nextflow_schema.json",
+    "title": " pipeline parameters",
+    "description": "",
+    "type": "object",
+    "$defs": {
+        "input_output_options": {
+            "title": "Input/output options",
+            "type": "object",
+            "fa_icon": "fas fa-terminal",
+            "description": "Define where the pipeline should find input data and save output data.",
+            "required": [
+                "input"
+            ],
+            "properties": {
+                "input": {
+                    "type": "string",
+                    "format": "file-path",
+                    "exists": true,
+                    "schema": "assets/schema_input.json",
+                    "mimetype": "text/csv",
+                    "pattern": "^\\S+\\.csv$",
+                    "description": "Path to the parent folder containing the \"barcode*\" folders containing the fastq files.",
+                    "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row.",
+                    "fa_icon": "fas fa-file-csv"
+                },
+                "output": {
+                    "type": "string",
+                    "description": "Output folder name",
+                    "default": "output"
+                }
+            }
+        },
+        "adapter_trimming": {
+            "title": "Adapter trimming",
+            "type": "object",
+            "description": "",
+            "default": "",
+            "properties": {
+                "minlength": {
+                    "type": "string",
+                    "default": "800",
+                    "description": "Minimum length of read, not including adapter sequence"
+                },
+                "maxlength": {
+                    "type": "string",
+                    "default": "1200",
+                    "description": "Maximum length of read, not including adapter sequence"
+                },
+                "save_untrimmed": {
+                    "type": "boolean",
+                    "description": "Save the reads that do not contain adapter sequences into a file."
+                }
+            }
+        },
+        "alignment": {
+            "title": "Alignment",
+            "type": "object",
+            "description": "",
+            "default": "",
+            "properties": {
+                "reference": {
+                    "type": "string",
+                    "default": "/projects/data/GCA_000001405.15_GRCh38_no_alt_analysis_set.mmi",
+                    "description": "Genomic reference file. Can be indexed (*.mmi) or un-indexed (*.fasta)."
+                },
+                "minimap2_param": {
+                    "type": "string",
+                    "default": "-ax map-ont -k 13 --MD",
+                    "description": "Parameters for minimap2"
+                }
+            },
+            "required": [
+                "reference"
+            ]
+        },
+        "umi_grouping": {
+            "title": "UMI grouping",
+            "type": "object",
+            "description": "",
+            "default": "",
+            "properties": {
+                "method": {
+                    "type": "string",
+                    "default": "adjacency",
+                    "description": "UMI correction method. Can be \"adjacency\", \"directional\" or \"cluster\"."
+                },
+                "familysizethreshold": {
+                    "type": "integer",
+                    "default": 5,
+                    "description": "Threshold for UMI family size."
+                }
+            }
+        },
+        "call_consensus": {
+            "title": "Call consensus",
+            "type": "object",
+            "description": "",
+            "default": "",
+            "properties": {
+                "bed": {
+                    "type": "string",
+                    "description": "Bed file containing the amplicon sites."
+                },
+                "snplist": {
+                    "type": "string",
+                    "description": "CSV file containing the list of SNPs in the amplicon sites."
+                },
+                "keep_nonconsensus": {
+                    "type": "boolean",
+                    "description": "Keep consensus sequences that contain Ds or Ns"
+                }
+            },
+            "required": [
+                "bed",
+                "snplist"
+            ]
+        },
+        "others": {
+            "title": "Others",
+            "type": "object",
+            "description": "",
+            "default": "",
+            "properties": {
+                "debug": {
+                    "type": "boolean",
+                    "description": "Turn on debug mode. Work directory is not cleaned up."
+                },
+                "threads": {
+                    "type": "integer",
+                    "default": 5,
+                    "description": "Number of threads to use for adapter detection and read alignment."
+                }
+            }
+        }
+    },
+    "allOf": [
+        {
+            "$ref": "#/$defs/input_output_options"
+        },
+        {
+            "$ref": "#/$defs/adapter_trimming"
+        },
+        {
+            "$ref": "#/$defs/alignment"
+        },
+        {
+            "$ref": "#/$defs/umi_grouping"
+        },
+        {
+            "$ref": "#/$defs/call_consensus"
+        },
+        {
+            "$ref": "#/$defs/others"
+        }
+    ]
+}
