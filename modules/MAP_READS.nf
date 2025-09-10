@@ -56,7 +56,9 @@ process MAP_READS {
         tuple val( samplename ), path( trimmed_fastq )
         path reference
     output:
-        tuple val( "${samplename}"), path ( "${samplename}.bam" ), path ( "${samplename}.bam.bai" ), emit: bamfile
+        tuple val( "${samplename}"), path ( "${samplename}.bam" ),  path ( "${samplename}.bam.bai" ), emit: bamfile        
+        tuple val( "${samplename}"), path ( "${samplename}.bam" ), emit: bamonly
+        tuple val( "${samplename}"), path ( "${samplename}.bam.bai" ), emit: bamindexonly
 
     script:
     """
