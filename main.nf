@@ -1,4 +1,4 @@
-nextflow.preview.output = true
+// nextflow.preview.output = true
 
 include { MERGE_FASTQ; TRIM_FASTQ; MAP_READS } from './modules/MAP_READS.nf'
 include { GENERATE_CONSENSUS } from './workflows/GENERATE_CONSENSUS.nf'
