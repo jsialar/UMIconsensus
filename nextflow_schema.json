@@ -33,12 +33,12 @@
       "default": "",
       "properties": {
         "minlength": {
-          "type": "string",
+          "type": "integer",
           "default": 800,
           "description": "Minimum length of read, not including adapter sequence"
         },
         "maxlength": {
-          "type": "string",
+          "type": "integer",
           "default": 1200,
           "description": "Maximum length of read, not including adapter sequence"
         },
@@ -93,11 +93,13 @@
       "properties": {
         "bed": {
           "type": "string",
-          "description": "Bed file containing the amplicon sites."
+          "description": "Bed file containing the amplicon sites.",
+          "format": "file-path"
         },
         "snplist": {
           "type": "string",
-          "description": "CSV file containing the list of SNPs in the amplicon sites."
+          "description": "CSV file containing the list of SNPs in the amplicon sites.",
+          "format": "file-path"
         },
         "keep_nonconsensus": {
           "type": "boolean",
