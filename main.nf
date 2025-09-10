@@ -46,9 +46,6 @@ workflow {
 
         MAP_READS.out.bamindexonly
             .combine(["aligned"]),
-
-        GENERATE_CONSENSUS.out.consensus_fastq
-            .combine(["call_consensus"]),
         
         GENERATE_CONSENSUS.out.umi_sizes_ch
             .map{file -> tuple(file.getSimpleName().tokenize('_')[0], file)}
