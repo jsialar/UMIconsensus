@@ -57,7 +57,8 @@
         "reference": {
           "type": "string",
           "default": "/projects/data/GCA_000001405.15_GRCh38_no_alt_analysis_set.mmi",
-          "description": "Genomic reference file. Can be indexed (*.mmi) or un-indexed (*.fasta)."
+          "description": "Genomic reference file. Can be indexed (*.mmi) or un-indexed (*.fasta).",
+          "format": "file-path"
         },
         "minimap2_param": {
           "type": "string",
