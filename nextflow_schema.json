@@ -118,11 +118,6 @@
         "debug": {
           "type": "boolean",
           "description": "Turn on debug mode. Work directory is not cleaned up."
-        },
-        "threads": {
-          "type": "integer",
-          "default": 5,
-          "description": "Number of threads to use for adapter detection and read alignment."
         }
       }
     }

@@ -20,6 +20,7 @@ process TRIM_FASTQ {
     
     input:
         tuple val(samplename), path(fastq)
+        val samplecount
     
     output:
         tuple val( "${samplename}" ), path("${samplename}.trimmed.fastq.gz"),  optional: true, emit: trimmed_fastq
@@ -30,11 +31,13 @@ process TRIM_FASTQ {
     def adapter_full="^AATGATACGGCGACCACCGAGATCTACACNNNNNNNNACACTCTTTCCCTACACGACGCTCTTCCGATCT...AGATCGGAAGAGCACACGTCTGAACTCCAGTCACNNNNNNNNATCTCGTATGCCGTCTTCTGCTTG\$"
     def adapter_short="ACACTCTTTCCCTACACGACGCTCTTCCGATCT...AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC"
     def save_untrimmed = params.save_untrimmed ? "--untrimmed-output ${samplename}.untrimmed.fastq.gz" : "--discard-untrimmed"
+    def numberOfCores = Runtime.getRuntime().availableProcessors()
+    def threads = (numberOfCores / samplecount) as int 
     """
         cutadapt -g F=${adapter_full} \
             -e 0.15 \
             --revcomp \
-            --cores ${params.threads} \
+            --cores ${threads} \
             --minimum-length ${params.minlength} \
             --maximum-length ${params.maxlength} \
             --json ${samplename}.json \
@@ -42,7 +45,7 @@ process TRIM_FASTQ {
             ${fastq} | \
         cutadapt --cut 8 \
             --cut -8 \
-            --cores ${params.threads} \
+            --cores ${threads} \
             --rename '{id}:{cut_prefix}{cut_suffix}' \
             -o ${samplename}.trimmed.fastq.gz - 
     """
@@ -51,27 +54,33 @@ process TRIM_FASTQ {
 
 process MAP_READS {
     //publishDir "${params.output}/${sample}/align/", mode: 'copy'
+    maxForks 4    
 
     input:
         tuple val( samplename ), path( trimmed_fastq )
         path reference
+        val samplecount
+
     output:
         tuple val( "${samplename}"), path ( "${samplename}.bam" ),  path ( "${samplename}.bam.bai" ), emit: bamfile        
         tuple val( "${samplename}"), path ( "${samplename}.bam" ), emit: bamonly
         tuple val( "${samplename}"), path ( "${samplename}.bam.bai" ), emit: bamindexonly
 
     script:
+    def numberOfCores = Runtime.getRuntime().availableProcessors()
+    def forks = samplecount < 4 ? samplecount : 4
+    def threads = (numberOfCores / forks) as int
     """
         minimap2 \
           ${params.minimap2_param} \
-          -t ${params.threads} \
+          -t ${threads} \
           ${reference} \
           ${trimmed_fastq} | 
         samtools sort \
-          -@ ${params.threads} \
+          -@ ${threads} \
           -o ${samplename}.bam - && \
         samtools index \
-          -@ ${params.threads} \
+          -@ ${threads} \
           ${samplename}.bam
     """
 }

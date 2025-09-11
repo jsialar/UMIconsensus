@@ -28,10 +28,13 @@ workflow {
         }
     .groupTuple( by: 0 ) 
     .set{ existing_fastqs }
+    
+    existing_fastqs.count().set{sample_count}
+    //sample_count.view()
 
     MERGE_FASTQ(existing_fastqs)
-    TRIM_FASTQ(MERGE_FASTQ.out.merged_fastq)
-    MAP_READS(TRIM_FASTQ.out.trimmed_fastq,  file("${params.reference}", checkIfExists: true))
+    TRIM_FASTQ(MERGE_FASTQ.out.merged_fastq, sample_count)
+    MAP_READS(TRIM_FASTQ.out.trimmed_fastq,  file("${params.reference}", checkIfExists: true), sample_count)
 
     GENERATE_CONSENSUS(MAP_READS.out.bamfile)
 
