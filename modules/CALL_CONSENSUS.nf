@@ -5,7 +5,6 @@ process CALL_CONSENSUS {
         tuple val( sample ), val(target), path ( bam ), path ( bam_bai )        
         
         output:
-        tuple val( "${sample}" ), val("${target}"), path("*.fastq.gz"), emit: consensus_fastq, optional:true
         tuple val( "${sample}" ), val("${target}"), path("*.fastq.gz"), path("*.csv"), emit: fastq_w_table
         tuple val( "${sample}" ), path("*.csv"), emit: consensus_table
     

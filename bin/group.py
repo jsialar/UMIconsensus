@@ -160,9 +160,6 @@ def main(argv=None):
     # specified options.method
     processor = network.UMIClusterer(options.method)
 
-    if options.tsv:
-        mapping_outfile = U.openFile(options.tsv, "w")
-        
     nInput, nOutput, unique_id, input_reads, output_reads = 0, 0, 0, 0, 0
 
     for region in parse_bed(options.bed):
@@ -177,10 +174,7 @@ def main(argv=None):
         assert options.output_bam, (
             "To output a bam you must include --output-bam option")
 
-        if options.output_bam:
-            outfile = pysam.Samfile(out_name, out_mode, template=infile)
-        else:
-            outfile = None
+        outfile = None
 
         inreads = infile.fetch(contig=region["chr"], start=region["start"], stop=region["end"])
 
@@ -230,7 +224,10 @@ def main(argv=None):
                 for umi in umi_group:
                     reads = bundle[umi]['read']
                     for read in reads:
-                        if outfile:
+
+                        if options.output_bam:
+                            if outfile is None:
+                                outfile = pysam.Samfile(out_name, out_mode, template=infile)
                             # Add the 'UG' tag to the read
                             read.set_tag('UG', unique_id)
                             read.set_tag(options.umi_group_tag, top_umi)
@@ -248,13 +245,17 @@ def main(argv=None):
                 os.unlink(out_name)  # delete the tempfile
                 pysam.index(sorted_out_name)
 
+        mapping_outfile = None 
         if options.tsv:
             for i in sorted(groupcounter.items()):
+                if mapping_outfile is None:
+                    mapping_outfile = U.openFile(options.tsv, "w")
                 mapping_outfile.write("%s\n" % "\t".join(map(str, (
                     i[0],
                     i[1],                
-                    region['name']))))                
-            mapping_outfile.close()
+                    region['name']))))
+            if mapping_outfile:
+                mapping_outfile.close()
 
         # write footer and output benchmark information.
         U.info(

@@ -58,7 +58,6 @@ workflow GENERATE_CONSENSUS{
     emit:
     umi_sizes_ch
     consensustable_ch
-    consensus_fastq = CALL_CONSENSUS.out.consensus_fastq
     consensus_quals = quals_ch
     consensus_haps = haps_ch
 

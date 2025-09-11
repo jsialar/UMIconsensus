@@ -19,8 +19,8 @@ process GROUP_UMI {
         
     
     output:
-        tuple val( "${sample}" ), val("${target}"), path("${target}.bam"), emit: grouped_bam        
-        tuple val( "${sample}" ), path("*.tsv"), emit: umi_sizes
+        tuple val( "${sample}" ), val("${target}"), path("${target}.bam"), emit: grouped_bam, optional: true      
+        tuple val( "${sample}" ), path("*.tsv"), emit: umi_sizes, optional: true
     
     script:
 
