@@ -6,7 +6,10 @@ process SPLIT_GROUP {
         
     
     output:
-        tuple val( "${sample}" ), val("${target}"), path("*.bam"), path("*.bai"), optional: true,  emit: splitted_bam        
+        tuple val( "${sample}" ), val("${target}"), path("*.bam"), path("*.bai"), optional: true,  emit: splitted_bam
+        tuple val( "${sample}" ), path("*.bam"), optional: true,  emit: splitted_bam_only
+        tuple val( "${sample}" ), path("*.bai"), optional: true,  emit: splitted_bai_only
+
     
     script:
 
@@ -18,3 +21,4 @@ process SPLIT_GROUP {
     samtools index -M P*.bam
     """
 }
+

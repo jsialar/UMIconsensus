@@ -12,6 +12,7 @@ process PROCESS_CONSENSUS {
     process_consensus.py \
     --sample ${sample} \
     --target ${target} \
+    --noisethreshold ${params.noise_threshold} \
     --fastqpath ${fastq} \
     --tablepath ${consensustable}    
     """

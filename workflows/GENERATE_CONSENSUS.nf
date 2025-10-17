@@ -45,6 +45,9 @@ workflow GENERATE_CONSENSUS{
     .collectFile{ file -> ["${file[0]}_consensustable.csv", file[1]] }
     .set{consensustable_ch}
 
+    CALL_CONSENSUS.out.consensus_fastq
+    .set{consensus_fastq_ch}
+
     PROCESS_CONSENSUS(CALL_CONSENSUS.out.fastq_w_table)
 
     PROCESS_CONSENSUS.out.qual
@@ -58,7 +61,10 @@ workflow GENERATE_CONSENSUS{
     emit:
     umi_sizes_ch
     consensustable_ch
+    consensus_fastq_ch
     consensus_quals = quals_ch
     consensus_haps = haps_ch
+    splitted_bam = SPLIT_GROUP.out.splitted_bam_only
+    splitted_bai = SPLIT_GROUP.out.splitted_bai_only
 
 }

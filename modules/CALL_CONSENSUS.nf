@@ -7,6 +7,7 @@ process CALL_CONSENSUS {
         output:
         tuple val( "${sample}" ), val("${target}"), path("*.fastq.gz"), path("*.csv"), emit: fastq_w_table
         tuple val( "${sample}" ), path("*.csv"), emit: consensus_table
+        tuple val( "${sample}" ), path("*.fastq.gz"), emit: consensus_fastq
     
     script:
     def keepundetermined = params.keep_nonconsensus ? "--keep" : ""

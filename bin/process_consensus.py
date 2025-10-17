@@ -8,25 +8,16 @@ import dnaio
 from glob import glob
 import os
 import argparse
+import pandas as pd
 
-def main(sample, region, fastqpath, tablepath ):
+def main(sample, noisethreshold, region, fastqpath, tablepath ):
 
-    consensustable = []
-    with open(tablepath, newline='') as csvfile:
-        reader = csv.reader(csvfile)
-        for row in reader:
-            if len(row) == 3 and row[2] == region:
-                consensustable.append({'hap': row[0], 'counts': int(row[1]), 'region': row[2]})
+    consensustable_detailed = pd.read_csv(tablepath, names=['hap', 'umifamilysize', 'count', 'region'])
+    consensustable = consensustable_detailed.groupby('hap').agg({'count':'sum'}).reset_index()
+    frac = consensustable['count'] / consensustable['count'].max()
+    consensustable_filtered = consensustable[frac >= noisethreshold]
 
-    if not consensustable:
-        raise ValueError(f"No records found for region {region}")
-
-
-    max_count = max(row['counts'] for row in consensustable)
-    threshold = max_count * 0.05
-    filtered = [row for row in consensustable if row['counts'] > threshold]
-
-    haplist = [row['hap'] for row in filtered]
+    haplist = consensustable_filtered['hap'].to_list()
     hapcount = len(haplist)
     haplength = len(haplist[0])
 
@@ -56,9 +47,10 @@ def main(sample, region, fastqpath, tablepath ):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Process consensus FASTQ and table.")
     parser.add_argument('--sample', type=str, required=True, help='Sample name')
+    parser.add_argument('--noisethreshold', type=float, required=True, help='Noise threshold')
     parser.add_argument('--target', type=str, required=True, help='Target name')
     parser.add_argument('--fastqpath', type=str, required=True, help='Path to consensus FASTQ file')
     parser.add_argument('--tablepath', type=str, required=True, help='Path to consensus table CSV')    
     
     args = parser.parse_args()
-    main(args.sample, args.target, args.fastqpath, args.tablepath)
+    main(args.sample, args.noisethreshold, args.target, args.fastqpath, args.tablepath)

@@ -12,6 +12,7 @@ class Fastq:
         self.name = '@' + name
         self.seq = []
         self.qual = []
+        self.umifamilysize = None
         
     def __repr__(self):
         return self.fastqstring()
@@ -30,7 +31,7 @@ class Fastq:
     def fastqstring(self):
         seq_string = self.seqstring()
         qual_string = ''.join(self.qual)
-        fastq_string = f'{self.name}\n{seq_string}\n+\n{qual_string}'
+        fastq_string = f'{self.name} {self.umifamilysize}\n{seq_string}\n+\n{qual_string}'
         return fastq_string
 
 
@@ -51,6 +52,8 @@ def main(inputpath, nonpolysnp, samplename, keep):
         idx = os.path.basename(bamfile).split('.')[0].split('_')[1]                
         name = f"{region}_{idx}"
         fastq = Fastq(name)
+        bam = pysam.AlignmentFile(bamfile, "rb")
+        num_alignments = bam.count()
 
         for pos in pos_list:
             called = pysam.consensus("-r", f"{chrno}:{pos}-{pos}", "--format", "fastq", bamfile, catch_stdout=True)
@@ -66,15 +69,16 @@ def main(inputpath, nonpolysnp, samplename, keep):
                 
             fastq.add(nuc, qual)
         else:
+            fastq.umifamilysize = num_alignments
             fastq_list.append(fastq)
 
-    seqcount = Counter([i.seqstring() for i in fastq_list])
+    seqcount = Counter([(i.seqstring(), i.umifamilysize) for i in fastq_list])
 
     # Write to CSV
     with open(f'{region}.csv', 'w', newline='') as csvfile:
         writer = csv.writer(csvfile)
-        for seq, count in seqcount.items():
-            writer.writerow([seq, count, region])
+        for (seq, umifamilysize), count in seqcount.items():
+            writer.writerow([seq, umifamilysize, count, region])
 
     # Write to fastq
     with gzip.open(f"{samplename}.{region}.fastq.gz", "wt") as fh:
