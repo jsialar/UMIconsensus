@@ -19,17 +19,20 @@ def main(sample, noisethreshold, region, fastqpath, tablepath ):
 
     haplist = consensustable_filtered['hap'].to_list()
     hapcount = len(haplist)
-    haplength = len(haplist[0])
 
-    score = [[0] * haplength] * hapcount
+    # Haplotypes may differ in length (indels), so each row is sized to its own
+    # haplotype rather than to haplist[0]. Built with a comprehension because
+    # [[0] * n] * hapcount aliases one list across every row, so a write to one
+    # haplotype's scores would overwrite them all.
+    score = [[0] * len(hap) for hap in haplist]
 
-    reader = dnaio.open(fastqpath)    
+    reader = dnaio.open(fastqpath)
 
     # Find max quality score for every bases
     for record in reader:
         for idx in range(hapcount):
             if record.sequence == haplist[idx]:
-                for i in range(haplength):
+                for i in range(len(haplist[idx])):
                     newqual = ord(record.qualities[i]) - 33
                     score[idx][i] = newqual if score[idx][i] < newqual else score[idx][i]
                 break

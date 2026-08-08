@@ -104,7 +104,7 @@
         },
         "keep_nonconsensus": {
           "type": "boolean",
-          "description": "Keep consensus sequences that contain Ds or Ns"
+          "description": "Keep consensus sequences that contain non-substitution calls: N (ambiguous), D (deletion), I (insertion), U (no coverage)"
         }
       },
       "required": ["bed", "snplist"]

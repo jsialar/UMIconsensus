@@ -55,16 +55,27 @@ def main(inputpath, nonpolysnp, samplename, keep):
         bam = pysam.AlignmentFile(bamfile, "rb")
         num_alignments = bam.count()
 
-        for pos in pos_list:
-            called = pysam.consensus("-r", f"{chrno}:{pos}-{pos}", "--format", "fastq", bamfile, catch_stdout=True)
+        for pos in pos_list: 
+            # get consensus for 1 position each time
+            called = pysam.consensus("-r", f"{chrno}:{pos}-{pos}", "--show-del", "yes",
+                                     "--format", "fastq", bamfile, catch_stdout=True)
             calledsplit = called.split()
+            #TODO: Minihaps with Indels are thrown out because we assume the positions have been prescreened for no indels based on HGDP_1K.
+            # However, a rare indel that is not present in HGDP_1K may be found in a new sample. 
             if len(calledsplit) < 4:
-                nuc, qual = ('D', '!')
-            else: 
+                # nothing emitted at all: position not covered by this family
+                nuc, qual = ('U', '!')
+            else:
                 _, nuc, _, qual = calledsplit
+                if len(nuc) > 1:
+                    # samtools anchors an insertion to the preceding base, so a
+                    # 1bp window returning >1 base means an insertion after pos
+                    nuc, qual = ('I', '!')
+                elif nuc == '*':
+                    nuc, qual = ('D', '!')
 
             if not keep:
-                if nuc == 'N' or nuc=='D':
+                if nuc in ('N', 'D', 'I', 'U'):
                     break
                 
             fastq.add(nuc, qual)
@@ -91,7 +102,9 @@ if __name__ == "__main__":
     parser.add_argument("--inputpath", type=str, help="Path to input BAM files. All BAM files should be for the same region. ")
     parser.add_argument("--nonpolysnp", type=str, help="Path to input snp positions files.")
     parser.add_argument("--samplename", type=str, help="Sample name")
-    parser.add_argument("--keep", help="Keep sequences that contain Ns and Ds", action='store_true')
+    parser.add_argument("--keep", help="Keep sequences that contain non-substitution calls: "
+                                       "N (ambiguous), D (deletion), I (insertion), U (no coverage)",
+                        action='store_true')
     args = parser.parse_args()
 
     main(args.inputpath, args.nonpolysnp, args.samplename, args.keep)
